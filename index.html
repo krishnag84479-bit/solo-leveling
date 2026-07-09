@@ -425,5 +425,88 @@ window.onload = initDashboard;
     </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LifeOS System | Pro</title>
+    <style>
+        :root { --neon: #00f3ff; --bg: #050505; }
+        body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; padding: 15px; margin: 0; }
+        .card { border: 1px solid var(--neon); padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 243, 255, 0.1); }
+        .nav-bar { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        button { background: transparent; color: var(--neon); border: 1px solid var(--neon); padding: 8px; cursor: pointer; font-weight: bold; }
+        button:hover { background: var(--neon); color: black; }
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        input { background: #111; border: 1px solid var(--neon); color: white; width: 80%; padding: 8px; }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <button onclick="changePage(-1)">PREVIOUS</button>
+        <button onclick="changePage(1)">NEXT / SKIP</button>
+    </div>
+
+    <!-- Page 1: Stats -->
+    <div class="page active" id="p0">
+        <div class="card">
+            <h3>HUNTER STATUS</h3>
+            <p>Level: <span id="h-lvl">1</span> | XP: <span id="h-xp">0</span></p>
+        </div>
+    </div>
+
+    <!-- Page 2: Hydration -->
+    <div class="page" id="p1">
+        <div class="card">
+            <h3>💧 HYDRATION</h3>
+            <p>Glass Count: <span id="w-count">0</span></p>
+            <button onclick="addWater()">+ ADD GLASS</button>
+        </div>
+    </div>
+
+    <!-- Page 3: Targets -->
+    <div class="page" id="p2">
+        <div class="card">
+            <h3>🎯 TARGET MANAGER</h3>
+            <input type="text" id="t-input" placeholder="Enter target...">
+            <button onclick="addTarget()">ADD</button>
+            <ul id="t-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        let cur = 0;
+        const pages = document.querySelectorAll('.page');
+        let data = { xp: 0, lvl: 1, water: 0 };
+
+        function changePage(dir) {
+            pages[cur].classList.remove('active');
+            cur = (cur + dir + pages.length) % pages.length;
+            pages[cur].classList.add('active');
+        }
+
+        function addWater() {
+            data.water += 1;
+            data.xp += 10;
+            document.getElementById('w-count').innerText = data.water;
+            document.getElementById('h-xp').innerText = data.xp;
+            document.getElementById('h-lvl').innerText = Math.floor(data.xp / 100) + 1;
+        }
+
+        function addTarget() {
+            const val = document.getElementById('t-input').value;
+            if(val) {
+                const li = document.createElement('li');
+                li.innerText = val;
+                document.getElementById('t-list').appendChild(li);
+                document.getElementById('t-input').value = '';
+            }
+        }
+    </script>
+</body>
+</html>
 
 
