@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LifeOS AI v1.0</title>
+    <style>
+        body { background: #0a0b10; color: #fff; font-family: 'Segoe UI', sans-serif; padding: 20px; }
+        .card { background: rgba(25, 27, 38, 0.7); border: 1px solid #00f3ff; border-radius: 15px; padding: 20px; margin-bottom: 15px; }
+        .stats { font-size: 1.2rem; font-weight: bold; color: #00f3ff; }
+        button { background: #00f3ff; color: #000; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        input { background: rgba(255,255,255,0.08); border: 1px solid #00f3ff; color: #fff; padding: 8px; border-radius: 5px; }
+        ul { list-style: none; padding: 0; }
+        li { background: rgba(255, 255, 255, 0.05); padding: 8px; margin: 5px 0; border-left: 4px solid #00f3ff; }
+        .loading { opacity: 0.5; }
+    </style>
+</head>
+<body>
+
+    <h1>LifeOS AI v1.0</h1>
+
+    <div class="card">
+        <div class="stats">Level: <span id="lvl">1</span> | XP: <span id="xp">0</span></div>
+    </div>
+
+    <div class="card">
+        <h3>💧 Hydration Tracker</h3>
+        <p>Water Intake: <span id="water-count">0</span> glasses</p>
+        <button onclick="logWater()">+ Add Glass</button>
+    </div>
+
+    <div class="card">
+        <h3>🍎 Meal Log</h3>
+        <input type="text" id="meal-input" placeholder="What did you eat?">
+        <button onclick="logMeal()">Add Meal</button>
+        <ul id="meal-list" class="loading"><li>Loading...</li></ul>
+    </div>
+
+    <script>
+        let data = { xp: 0, lvl: 1, water: 0, meals: [] };
+
+        async function saveData() {
+            try {
+                await window.storage.set('lifeOS', JSON.stringify(data));
+            } catch (e) {
+                console.error('Save failed', e);
+            }
+        }
+
+        async function loadData() {
+            try {
+                const result = await window.storage.get('lifeOS');
+                if (result && result.value) {
+                    data = JSON.parse(result.value);
+                }
+            } catch (e) {
+                // no existing data yet, use defaults
+            }
+        }
+
+        function renderMeals() {
+            const list = document.getElementById('meal-list');
+            list.classList.remove('loading');
+            list.innerHTML = '';
+            data.meals.forEach(m => {
+                const li = document.createElement('li');
+                li.innerText = m;
+                list.appendChild(li);
+            });
+        }
+
+        function updateUI() {
+            document.getElementById('xp').innerText = data.xp;
+            document.getElementById('lvl').innerText = data.lvl;
+            document.getElementById('water-count').innerText = data.water;
+        }
+
+        async function logWater() {
+            data.water++;
+            data.xp += 5;
+            data.lvl = Math.floor(data.xp / 100) + 1;
+            updateUI();
+            await saveData();
+        }
+
+        async function logMeal() {
+            const input = document.getElementById('meal-input');
+            if (input.value) {
+                data.meals.push(input.value);
+                data.xp += 10;
+                data.lvl = Math.floor(data.xp / 100) + 1;
+                input.value = '';
+                updateUI();
+                renderMeals();
+                await saveData();
+            }
+        }
+
+        window.onload = async () => {
+            await loadData();
+            updateUI();
+            renderMeals();
+        };
+    </script>
+</body>
+</html>
