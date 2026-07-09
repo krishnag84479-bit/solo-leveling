@@ -510,3 +510,80 @@ window.onload = initDashboard;
 </html>
 
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LifeOS AI | Unified System</title>
+    <style>
+        :root { --neon: #00f3ff; --bg: #050505; }
+        body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; padding: 20px; }
+        .card { border: 1px solid var(--neon); padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); }
+        .nav-btn { background: var(--neon); color: black; border: none; padding: 10px; margin: 5px; cursor: pointer; font-weight: bold; }
+        .page { display: none; }
+        .page.active { display: block; }
+        input { background: #111; border: 1px solid var(--neon); color: white; padding: 10px; width: 80%; }
+    </style>
+</head>
+<body>
+
+    <div style="text-align: center; margin-bottom: 20px;">
+        <button class="nav-btn" onclick="changePage(-1)">PREV</button>
+        <button class="nav-btn" onclick="changePage(1)">NEXT</button>
+    </div>
+
+    <div class="page active" id="p0">
+        <div class="card">
+            <h3>HUNTER STATUS</h3>
+            <p>Level: <span id="h-lvl">1</span> | XP: <span id="h-xp">0</span></p>
+        </div>
+    </div>
+
+    <div class="page" id="p1">
+        <div class="card">
+            <h3>SYSTEM COMMANDER</h3>
+            <button class="nav-btn" onclick="startAI()">🎙️ RECORD VOICE</button>
+            <p id="ai-response">Waiting for command...</p>
+        </div>
+        <div class="card">
+            <h3>ADD TARGET</h3>
+            <input type="text" id="target-input" placeholder="New Mission...">
+            <button class="nav-btn" onclick="addTarget()">ADD</button>
+            <ul id="target-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        let cur = 0;
+        const pages = document.querySelectorAll('.page');
+        
+        function changePage(dir) {
+            pages[cur].classList.remove('active');
+            cur = (cur + dir + pages.length) % pages.length;
+            pages[cur].classList.add('active');
+        }
+
+        // Free AI Voice Command (Browser Native)
+        function startAI() {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'en-US';
+            recognition.start();
+            recognition.onresult = (event) => {
+                const command = event.results[0][0].transcript;
+                document.getElementById('ai-response').innerText = "Command: " + command;
+                // Yahan tum logic daal sakte ho, jaise "Add target" bolne par apne aap list mein add ho jaye
+            };
+        }
+
+        function addTarget() {
+            const val = document.getElementById('target-input').value;
+            if(val) {
+                const li = document.createElement('li');
+                li.innerText = val;
+                document.getElementById('target-list').appendChild(li);
+                document.getElementById('target-input').value = '';
+            }
+        }
+    </script>
+</body>
+</html>
