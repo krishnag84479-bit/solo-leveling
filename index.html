@@ -2,455 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>LifeOS AI v1.0</title>
-    <style>
-        body { background: #0a0b10; color: #fff; font-family: 'Segoe UI', sans-serif; padding: 20px; }
-        .card { background: rgba(25, 27, 38, 0.7); border: 1px solid #00f3ff; border-radius: 15px; padding: 20px; margin-bottom: 15px; }
-        .stats { font-size: 1.2rem; font-weight: bold; color: #00f3ff; }
-        button { background: #00f3ff; color: #000; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        ul { list-style: none; padding: 0; }
-        li { background: rgba(255, 255, 255, 0.05); padding: 8px; margin: 5px 0; border-left: 4px solid #00f3ff; }
-    </style>
-</head>
-<body>
-
-    <h1>LifeOS AI v1.0</h1>
-
-    <div class="card">
-        <div class="stats">Level: <span id="lvl">1</span> | XP: <span id="xp">0</span></div>
-    </div>
-
-    <div class="card">
-        <h3>💧 Hydration Tracker</h3>
-        <p>Water Intake: <span id="water-count">0</span> glasses</p>
-        <button onclick="logWater()">+ Add Glass</button>
-    </div>
-
-    <div class="card">
-        <h3>🍎 Meal Log</h3>
-        <input type="text" id="meal-input" placeholder="What did you eat?">
-        <button onclick="logMeal()">Add Meal</button>
-        <ul id="meal-list"></ul>
-    </div>
-
-    <script>
-        // Load data from memory
-        let data = JSON.parse(localStorage.getItem('lifeOS')) || { xp: 0, lvl: 1, water: 0, meals: [] };
-
-        function updateUI() {
-            document.getElementById('xp').innerText = data.xp;
-            document.getElementById('lvl').innerText = data.lvl;
-            document.getElementById('water-count').innerText = data.water;
-            localStorage.setItem('lifeOS', JSON.stringify(data));
-        }
-
-        function logWater() {
-            data.water++;
-            data.xp += 5;
-            data.lvl = Math.floor(data.xp / 100) + 1;
-            updateUI();
-        }
-
-        function logMeal() {
-            const input = document.getElementById('meal-input');
-            if(input.value) {
-                const li = document.createElement('li');
-                li.innerText = input.value;
-                document.getElementById('meal-list').appendChild(li);
-                data.meals.push(input.value);
-                data.xp += 10;
-                data.lvl = Math.floor(data.xp / 100) + 1;
-                input.value = '';
-                updateUI();
-            }
-        }
-
-        // Initialize display
-        window.onload = () => {
-            updateUI();
-            data.meals.forEach(m => {
-                const li = document.createElement('li');
-                li.innerText = m;
-                document.getElementById('meal-list').appendChild(li);
-            });
-        };
-    </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="manifest" href="manifest.json">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        :root { --neon: #00f3ff; --bg: #0a0b10; --card: rgba(25, 27, 38, 0.8); }
-        body { background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; padding: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .card { background: var(--card); border: 1px solid #333; border-radius: 20px; padding: 20px; margin-bottom: 20px; }
-        .neon-text { color: var(--neon); text-shadow: 0 0 10px var(--neon); }
-        button { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 8px 12px; border-radius: 8px; cursor: pointer; }
-        button:hover { background: var(--neon); color: black; }
-    </style>
-</head>
-<body>
-    <h1>LifeOS AI v2.0</h1>
-    <div id="app">
-        <div id="login-screen" class="card">
-            <input type="text" id="username-input" placeholder="Enter Username">
-            <button onclick="loginUser()">Access System</button>
-        </div>
-
-        <div id="dashboard" style="display:none;">
-            <div class="card"><h2 class="neon-text">Health Score: <span id="health-score-val">0</span></h2></div>
-            <div class="grid">
-                <div class="card">
-                    <h2>💧 Hydration</h2>
-                    <p><span id="w-val">0</span>ml / 3000ml</p>
-                    <button onclick="addWater(250)">+250ml</button>
-                </div>
-                <div class="card">
-                    <h2>🧠 AI Inference</h2>
-                    <p id="ai-advice">Analyzing data...</p>
-                </div>
-            </div>
-            <canvas id="healthChart"></canvas>
-        </div>
-    </div>
-
-    <script src="app.js"></script>
-</body>
-</html>
-let healthData = JSON.parse(localStorage.getItem('lifeOS_health')) || { water: 0, workout: 0 };
-
-function loginUser() {
-    localStorage.setItem('user_profile', document.getElementById('username-input').value);
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'block';
-}
-
-function addWater(amount) {
-    healthData.water += amount;
-    updateUI();
-    runSmartInference();
-}
-
-function runSmartInference() {
-    let advice = healthData.water < 1500 ? "Drink more water!" : "Hydration on point!";
-    document.getElementById('ai-advice').innerText = advice;
-}
-
-function updateUI() {
-    document.getElementById('w-val').innerText = healthData.water;
-    document.getElementById('health-score-val').innerText = Math.min(healthData.water / 30, 100).toFixed(0);
-}
-
-// Check Login
-if (localStorage.getItem('user_profile')) {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'block';
-    updateUI();
-}
-{
-  "name": "LifeOS AI",
-  "short_name": "LifeOS",
-  "start_url": "index.html",
-  "display": "standalone",
-  "background_color": "#0a0b10",
-  "theme_color": "#00f3ff"
-}
-        <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LifeOS v3.0 | Study Suite</title>
-    <style>
-        :root { --neon: #00f3ff; --bg: #0a0b10; --card: #191b26; }
-        body { background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; padding: 20px; }
-        .card { background: var(--card); border: 1px solid var(--neon); padding: 20px; border-radius: 15px; margin-bottom: 20px; }
-        button { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 10px; border-radius: 5px; cursor: pointer; margin: 5px; }
-        button:hover { background: var(--neon); color: black; }
-        textarea, input { width: 90%; padding: 10px; margin: 10px 0; background: #000; color: #fff; border: 1px solid #444; }
-    </style>
-</head>
-<body>
-
-    <h1>LifeOS v3.0 | Study & Work</h1>
-
-    <div class="card">
-        <h3>📚 Syllabus & Quiz</h3>
-        <input type="text" id="subject" placeholder="Subject Name">
-        <textarea id="syllabus" placeholder="Enter chapters (comma separated)"></textarea>
-        <button onclick="saveSyllabus()">Save Syllabus</button>
-        <div id="quiz-area" style="display:none;">
-            <p id="q-text"></p>
-            <button onclick="generateQuiz()">Next Question</button>
-        </div>
-    </div>
-
-    <div class="card">
-        <h3>🎙 Smart Voice Notes</h3>
-        <input type="text" id="note-input" placeholder="Voice note appears here...">
-        <button onclick="startVoiceNote()">🎙 Record</button>
-        <p id="voice-status"></p>
-    </div>
-
-    <script>
-        // State Management
-        let userData = { syllabus: [], currentSubject: "" };
-        let srsData = JSON.parse(localStorage.getItem('srs_data')) || {};
-
-        function saveSyllabus() {
-            userData.currentSubject = document.getElementById('subject').value;
-            userData.syllabus = document.getElementById('syllabus').value.split(',');
-            document.getElementById('quiz-area').style.display = 'block';
-            alert("Syllabus Saved!");
-        }
-
-        function generateQuiz() {
-            let chapter = userData.syllabus[Math.floor(Math.random() * userData.syllabus.length)];
-            document.getElementById('q-text').innerText = `Explain key concepts of: ${chapter}`;
-        }
-
-        // Voice to Text
-        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        function startVoiceNote() {
-            recognition.start();
-            document.getElementById('voice-status').innerText = "Listening...";
-        }
-        recognition.onresult = (event) => {
-            document.getElementById('note-input').value = event.results[0][0].transcript;
-            document.getElementById('voice-status').innerText = "Note captured!";
-        };
-    </script>
-</body>
-</html>const LifeOS = {
-    data: JSON.parse(localStorage.getItem('lifeOS_v4')) || {
-        missions: [],
-        moods: [],
-        xp: 0,
-        streak: 0,
-        logs: []
-    },
-
-    // 1. AI Commander: Morning Briefing
-    getBriefing: function() {
-        const successChance = Math.min(80 + (this.data.streak * 2), 99);
-        return `🌅 Good Morning, Om! Success Chance: ${successChance}%. Today's Missions: Study 6h, Water 3L, Workout, Code 2h.`;
-    },
-
-    // 2. Emergency Mode: Recovery Logic
-    checkEmergency: function() {
-        if (this.data.logs.length > 3 && this.countMissed() > 3) {
-            document.body.style.border = "5px solid red"; // Visual alert
-            return "⚠️ Discipline Alert: Entering Recovery Mode. Scaling down goals.";
-        }
-        return "System Optimal.";
-    },
-
-    // 3. Habit Predictor
-    predictHabits: function() {
-        if (this.data.moods.includes('Tired')) {
-            return "Prediction: Sleep quality is dropping. Limit screen time after 10 PM.";
-        }
-    },
-
-    // 4. Voice Assistant Commands
-    processCommand: function(cmd) {
-        cmd = cmd.toLowerCase();
-        if (cmd.includes("water")) {
-            this.data.xp += 10;
-            return "Water logged! +10 XP";
-        } else if (cmd.includes("workout")) {
-            this.data.streak++;
-            return "Workout complete! 🔥 Streak updated.";
-        }
-        return "Command not recognized.";
-    },
-
-    countMissed: () => 4 // Placeholder logic
-};
-
-// UI Controller
-function initDashboard() {
-    document.getElementById('ai-brief').innerText = LifeOS.getBriefing();
-    document.getElementById('ai-advice').innerText = LifeOS.checkEmergency();
-}
-
-window.onload = initDashboard;
-<!DOCTYPE html>
-<html>
-<body>
-    <div id="ai-brief" class="card"></div>
-    <div id="ai-advice" class="card"></div>
-    
-    <button onclick="startVoice()">🎙 Activate AI Commander</button>
-    
-    <script src="app.js"></script>
-    <script>
-        function startVoice() {
-            const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            rec.start();
-            rec.onresult = (e) => {
-                let res = LifeOS.processCommand(e.results[0][0].transcript);
-                alert(res);
-            };
-        }
-    </script>
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>LifeOS v5.0 | Solo Leveling</title>
-    <style>
-        /* CSS: Shadow Monarch Theme */
-        :root { --neon: #00f3ff; --bg: #0a0b10; --card: #191b26; --red: #ff003c; }
-        body { background: var(--bg); color: #fff; font-family: 'Orbitron', sans-serif; padding: 20px; }
-        .card { background: var(--card); border: 2px solid var(--neon); padding: 20px; border-radius: 15px; margin: 10px 0; box-shadow: 0 0 15px var(--neon); }
-        .hp-bar-container { width: 100%; height: 25px; background: #222; border: 2px solid #fff; margin: 10px 0; }
-        #hp-bar { height: 100%; background: linear-gradient(90deg, var(--red), #ff8c00); width: 100%; transition: 0.5s; }
-        button { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 10px 20px; cursor: pointer; text-transform: uppercase; }
-        button:hover { background: var(--neon); color: #000; }
-    </style>
-</head>
-<body>
-
-    <!-- Hunter Profile -->
-    <div class="card">
-        <h2>👤 HUNTER PROFILE: <span id="h-name">OM</span></h2>
-        <p>Rank: <span id="h-rank">E-Rank</span> | Level: <span id="h-lvl">1</span></p>
-        <p>XP: <span id="h-xp">0</span> / 500</p>
-    </div>
-
-    <!-- Boss Fight Area -->
-    <div class="card">
-        <h2 id="boss-name">BOSS: CA Foundation</h2>
-        <div class="hp-bar-container"><div id="hp-bar"></div></div>
-        <button onclick="attackBoss()">ATTACK BOSS (Study)</button>
-    </div>
-
-    <script>
-        // State
-        let hunter = { name: "OM", xp: 0, level: 1, rank: "E-Rank" };
-        let boss = { hp: 100, maxHp: 100 };
-
-        // Logic
-        function attackBoss() {
-            boss.hp -= 20;
-            hunter.xp += 50;
-            
-            // Play SFX (Browser restriction: needs click first)
-            new Audio('https://www.soundjay.com/button/sounds/button-09.mp3').play();
-            
-            if(boss.hp <= 0) {
-                boss.hp = 100;
-                hunter.level++;
-                alert("BOSS DEFEATED! Level Up!");
-            }
-            updateUI();
-        }
-
-        function updateUI() {
-            document.getElementById('hp-bar').style.width = boss.hp + "%";
-            document.getElementById('h-xp').innerText = hunter.xp;
-            document.getElementById('h-lvl').innerText = hunter.level;
-            if(hunter.xp > 500) document.getElementById('h-rank').innerText = "D-Rank";
-        }
-    </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>LifeOS System | Advanced</title>
-    <style>
-        :root { --neon: #00f3ff; --bg: #050505; }
-        body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; padding: 20px; }
-        .card { border: 1px solid var(--neon); padding: 15px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); }
-        .nav-btn { background: var(--neon); color: black; border: none; padding: 10px; cursor: pointer; font-weight: bold; width: 48%; }
-        .page { display: none; }
-        .page.active { display: block; }
-        input { background: #111; border: 1px solid var(--neon); color: white; width: 90%; padding: 8px; }
-    </style>
-</head>
-<body>
-
-    <div id="app">
-        <div id="pages-container">
-            <div class="page active" id="p0">
-                <div class="card">
-                    <h3>Hunter Status</h3>
-                    <p>Level: <span id="h-lvl">1</span> | XP: <span id="h-xp">0</span></p>
-                </div>
-            </div>
-
-            <div class="page" id="p1">
-                <div class="card">
-                    <h3>Add New Target</h3>
-                    <input type="text" id="target-input" placeholder="e.g., CA Foundation Study">
-                    <button onclick="addTarget()">Add Target</button>
-                    <ul id="target-list"></ul>
-                </div>
-            </div>
-        </div>
-
-        <div style="display:flex; justify-content: space-between;">
-            <button class="nav-btn" onclick="changePage(-1)">Previous</button>
-            <button class="nav-btn" onclick="changePage(1)">Next / Skip</button>
-        </div>
-    </div>
-
-    <script>
-        let cur = 0;
-        const pages = document.querySelectorAll('.page');
-        
-        function changePage(dir) {
-            pages[cur].classList.remove('active');
-            cur = (cur + dir + pages.length) % pages.length;
-            pages[cur].classList.add('active');
-        }
-
-        function addTarget() {
-            const val = document.getElementById('target-input').value;
-            if(val) {
-                const li = document.createElement('li');
-                li.innerText = val;
-                document.getElementById('target-list').appendChild(li);
-                document.getElementById('target-input').value = '';
-            }
-        }
-    </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>LifeOS System | Pro</title>
+    <title>LifeOS System | PRO</title>
     <style>
         :root { --neon: #00f3ff; --bg: #050505; }
         body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; padding: 15px; margin: 0; }
         .card { border: 1px solid var(--neon); padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 243, 255, 0.1); }
         .nav-bar { display: flex; justify-content: space-between; margin-bottom: 20px; }
-        button { background: transparent; color: var(--neon); border: 1px solid var(--neon); padding: 8px; cursor: pointer; font-weight: bold; }
+        button { background: transparent; color: var(--neon); border: 1px solid var(--neon); padding: 10px; cursor: pointer; font-weight: bold; }
         button:hover { background: var(--neon); color: black; }
         .page { display: none; }
-        .page.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        input { background: #111; border: 1px solid var(--neon); color: white; width: 80%; padding: 8px; }
+        .page.active { display: block; }
+        input { background: #111; border: 1px solid var(--neon); color: white; padding: 10px; width: 80%; margin: 10px 0; }
     </style>
 </head>
 <body>
 
     <div class="nav-bar">
-        <button onclick="changePage(-1)">PREVIOUS</button>
-        <button onclick="changePage(1)">NEXT / SKIP</button>
+        <button onclick="changePage(-1)">PREV</button>
+        <button onclick="globalVoiceCommand()">🎙️ COMMANDER</button>
+        <button onclick="changePage(1)">NEXT</button>
     </div>
 
-    <!-- Page 1: Stats -->
     <div class="page active" id="p0">
         <div class="card">
             <h3>HUNTER STATUS</h3>
@@ -458,21 +30,19 @@ window.onload = initDashboard;
         </div>
     </div>
 
-    <!-- Page 2: Hydration -->
     <div class="page" id="p1">
         <div class="card">
             <h3>💧 HYDRATION</h3>
             <p>Glass Count: <span id="w-count">0</span></p>
-            <button onclick="addWater()">+ ADD GLASS</button>
+            <button onclick="updateWater()">+ ADD GLASS</button>
         </div>
     </div>
 
-    <!-- Page 3: Targets -->
     <div class="page" id="p2">
         <div class="card">
             <h3>🎯 TARGET MANAGER</h3>
-            <input type="text" id="t-input" placeholder="Enter target...">
-            <button onclick="addTarget()">ADD</button>
+            <input type="text" id="t-input" placeholder="Mission...">
+            <button onclick="addTarget()">ADD MISSION</button>
             <ul id="t-list"></ul>
         </div>
     </div>
@@ -488,7 +58,19 @@ window.onload = initDashboard;
             pages[cur].classList.add('active');
         }
 
-        function addWater() {
+        // Global Voice Command (Works on every page)
+        function globalVoiceCommand() {
+            const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            rec.start();
+            rec.onresult = (e) => {
+                const cmd = e.results[0][0].transcript.toLowerCase();
+                if(cmd.includes('water')) updateWater();
+                if(cmd.includes('next')) changePage(1);
+                if(cmd.includes('back')) changePage(-1);
+            };
+        }
+
+        function updateWater() {
             data.water += 1;
             data.xp += 10;
             document.getElementById('w-count').innerText = data.water;
@@ -503,85 +85,6 @@ window.onload = initDashboard;
                 li.innerText = val;
                 document.getElementById('t-list').appendChild(li);
                 document.getElementById('t-input').value = '';
-            }
-        }
-    </script>
-</body>
-</html>
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>LifeOS AI | Unified System</title>
-    <style>
-        :root { --neon: #00f3ff; --bg: #050505; }
-        body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; padding: 20px; }
-        .card { border: 1px solid var(--neon); padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); }
-        .nav-btn { background: var(--neon); color: black; border: none; padding: 10px; margin: 5px; cursor: pointer; font-weight: bold; }
-        .page { display: none; }
-        .page.active { display: block; }
-        input { background: #111; border: 1px solid var(--neon); color: white; padding: 10px; width: 80%; }
-    </style>
-</head>
-<body>
-
-    <div style="text-align: center; margin-bottom: 20px;">
-        <button class="nav-btn" onclick="changePage(-1)">PREV</button>
-        <button class="nav-btn" onclick="changePage(1)">NEXT</button>
-    </div>
-
-    <div class="page active" id="p0">
-        <div class="card">
-            <h3>HUNTER STATUS</h3>
-            <p>Level: <span id="h-lvl">1</span> | XP: <span id="h-xp">0</span></p>
-        </div>
-    </div>
-
-    <div class="page" id="p1">
-        <div class="card">
-            <h3>SYSTEM COMMANDER</h3>
-            <button class="nav-btn" onclick="startAI()">🎙️ RECORD VOICE</button>
-            <p id="ai-response">Waiting for command...</p>
-        </div>
-        <div class="card">
-            <h3>ADD TARGET</h3>
-            <input type="text" id="target-input" placeholder="New Mission...">
-            <button class="nav-btn" onclick="addTarget()">ADD</button>
-            <ul id="target-list"></ul>
-        </div>
-    </div>
-
-    <script>
-        let cur = 0;
-        const pages = document.querySelectorAll('.page');
-        
-        function changePage(dir) {
-            pages[cur].classList.remove('active');
-            cur = (cur + dir + pages.length) % pages.length;
-            pages[cur].classList.add('active');
-        }
-
-        // Free AI Voice Command (Browser Native)
-        function startAI() {
-            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = 'en-US';
-            recognition.start();
-            recognition.onresult = (event) => {
-                const command = event.results[0][0].transcript;
-                document.getElementById('ai-response').innerText = "Command: " + command;
-                // Yahan tum logic daal sakte ho, jaise "Add target" bolne par apne aap list mein add ho jaye
-            };
-        }
-
-        function addTarget() {
-            const val = document.getElementById('target-input').value;
-            if(val) {
-                const li = document.createElement('li');
-                li.innerText = val;
-                document.getElementById('target-list').appendChild(li);
-                document.getElementById('target-input').value = '';
             }
         }
     </script>
