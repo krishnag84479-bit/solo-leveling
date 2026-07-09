@@ -1,1 +1,56 @@
 
+ShadowMonarchGame/
+├── Scripts/
+│   ├── ArmyManager.gd        # Central Hub
+│   ├── ShadowEntity.gd       # Base Class
+│   ├── Bellion.gd            # Grand Marshal Logic
+│   └── Kaisel.gd             # Wyvern/Mount Logic
+├── Scenes/                   # .tscn files (Characters)
+└── README.md                 # Project Description
+extends CharacterBody3D
+class_name ShadowEntity
+
+var base_damage: float = 10.0
+var current_damage: float = 10.0
+
+func apply_power_boost(multiplier: float):
+    current_damage = base_damage * multiplier
+extends Node
+# Yeh file aapke poore game ko manage karti hai
+signal army_command_issued(type)
+
+func _ready():
+    print("Shadow Monarch Army System Initialized...")
+
+func spawn_unit(unit_name: String, position: Vector3):
+    var path = "res://Scenes/" + unit_name + ".tscn"
+    if ResourceLoader.exists(path):
+        var unit = load(path).instantiate()
+        add_child(unit)
+        unit.global_position = position
+extends ShadowEntity
+
+func _apply_marshal_buff():
+    # 25% Attack boost for nearby army
+    var units = get_tree().get_nodes_in_group("shadow_army")
+    for unit in units:
+        if unit != self and unit.global_position.distance_to(global_position) < 15.0:
+            unit.apply_power_boost(1.25)
+extends CharacterBody3D
+
+var is_flying: bool = true
+
+func perform_sonic_dive(target_pos: Vector3):
+    var tween = create_tween()
+    tween.tween_property(self, "global_position", target_pos, 0.4)
+# Shadow Monarch Engine
+Ek advanced dark fantasy action game project, jismein Shadow Army (Igris, Beru, Tusk, Iron, Bellion, Kaisel) ka complete logic integrate hai.
+
+## Features:
+- Unified Entity System (Base Class Inheritance).
+- Dynamic Army Buffing System (Bellion Marshal Logic).
+- Aerial Mobility & Mount System (Kaisel Wyvern).
+- Signal-based Event Management for high performance.
+
+## License:
+MIT License. Feel free to contribute!
