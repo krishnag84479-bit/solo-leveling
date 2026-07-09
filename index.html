@@ -50,7 +50,9 @@
     <script>
         let cur = 0;
         const pages = document.querySelectorAll('.page');
-        let data = { xp: 0, lvl: 1, water: 0 };
+        let data = JSON.parse(localStorage.getItem('lifeOS_data')) || { xp: 0, lvl: 1, water: 0 };
+
+        function save() { localStorage.setItem('lifeOS_data', JSON.stringify(data)); }
 
         function changePage(dir) {
             pages[cur].classList.remove('active');
@@ -58,7 +60,6 @@
             pages[cur].classList.add('active');
         }
 
-        // Global Voice Command (Works on every page)
         function globalVoiceCommand() {
             const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
             rec.start();
@@ -66,7 +67,6 @@
                 const cmd = e.results[0][0].transcript.toLowerCase();
                 if(cmd.includes('water')) updateWater();
                 if(cmd.includes('next')) changePage(1);
-                if(cmd.includes('back')) changePage(-1);
             };
         }
 
@@ -76,6 +76,7 @@
             document.getElementById('w-count').innerText = data.water;
             document.getElementById('h-xp').innerText = data.xp;
             document.getElementById('h-lvl').innerText = Math.floor(data.xp / 100) + 1;
+            save();
         }
 
         function addTarget() {
@@ -85,6 +86,7 @@
                 li.innerText = val;
                 document.getElementById('t-list').appendChild(li);
                 document.getElementById('t-input').value = '';
+                save();
             }
         }
     </script>
