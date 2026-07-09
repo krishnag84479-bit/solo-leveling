@@ -2,37 +2,90 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>LifeOS System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeOS AI | Unified</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
     <style>
-        body { background: #050505; color: #00f3ff; font-family: 'Courier New', monospace; padding: 20px; }
-        .card { background: rgba(0, 20, 30, 0.8); border: 1px solid #00f3ff; padding: 15px; margin-bottom: 20px; border-radius: 5px; box-shadow: 0 0 10px #00f3ff; }
-        .progress-bar { width: 100%; height: 20px; background: #222; border: 1px solid #00f3ff; }
-        .progress-fill { height: 100%; background: #00f3ff; width: 20%; }
-        button { background: #00f3ff; border: none; padding: 5px 10px; cursor: pointer; font-weight: bold; }
+        :root { --neon: #00f3ff; --bg: #0a0b10; --card: rgba(25, 27, 38, 0.85); --red: #ff003c; }
+        * { box-sizing: border-box; }
+        body { background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; padding: 20px; border: 5px solid transparent; transition: border 0.3s; max-width: 700px; margin: 0 auto; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+        .card { background: var(--card); border: 1px solid var(--neon); border-radius: 15px; padding: 20px; margin-bottom: 20px; }
+        .stats { font-size: 1.2rem; font-weight: bold; color: var(--neon); }
+        .neon-text { color: var(--neon); text-shadow: 0 0 10px var(--neon); }
+        button { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 8px 12px; border-radius: 8px; cursor: pointer; margin: 5px 5px 5px 0; font-weight: bold; }
+        button:hover { background: var(--neon); color: black; }
+        input, textarea { width: 90%; padding: 10px; margin: 10px 0; background: #000; color: #fff; border: 1px solid #444; border-radius: 5px; }
+        ul { list-style: none; padding: 0; }
+        li { background: rgba(255, 255, 255, 0.05); padding: 8px; margin: 5px 0; border-left: 4px solid var(--neon); border-radius: 3px; }
+        .page { display: none; }
+        .page.active { display: block; }
+        .nav-bar { position: sticky; top: 0; background: var(--bg); padding: 12px 0; margin-bottom: 15px; border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; }
+        #hp-bar { height: 25px; background: linear-gradient(90deg, var(--red), #ff8c00); width: 100%; transition: 0.5s; border: 1px solid #fff; }
     </style>
 </head>
 <body>
-    <h1>System Status: Online</h1>
-    
-    <div class="card">
-        <h3>User Stats</h3>
-        <p>Level: 1 | XP: 20/100</p>
-        <div class="progress-bar"><div class="progress-fill"></div></div>
+
+    <div id="login-screen" class="card">
+        <h1>LifeOS AI</h1>
+        <input type="text" id="username-input" placeholder="Enter Username">
+        <button onclick="loginUser()">Access System</button>
     </div>
 
-    <div class="card">
-        <h3>Daily Quests</h3>
-        <ul id="taskList">
-            <li><input type="checkbox"> Drink 3L Water</li>
-            <li><input type="checkbox"> Coding Session (1 Hour)</li>
-            <li><input type="checkbox"> Workout</li>
-        </ul>
+    <div id="dashboard" style="display:none;">
+        <div class="nav-bar">
+            <span id="page-title">1 / 7</span>
+            <div>
+                <button onclick="prevPage()" id="prev-btn">⬅</button>
+                <button onclick="nextPage()" id="next-btn">➡</button>
+            </div>
+        </div>
+
+        <div class="page active" data-page="0">
+            <div class="card">
+                <div class="stats">Level: <span id="lvl">1</span> | XP: <span id="xp">0</span></div>
+            </div>
+            <div id="ai-brief" class="card">Welcome, Hunter.</div>
+        </div>
+
+        <div class="page" data-page="1">
+            <div class="card">
+                <h3>💧 Hydration Tracker</h3>
+                <button onclick="addWater(250)">+ Add Glass</button>
+            </div>
+        </div>
+
+        <div class="page" data-page="2">
+            <div class="card">
+                <h2 class="neon-text">Health Score</h2>
+                <canvas id="healthChart" height="120"></canvas>
+            </div>
+        </div>
+
+        <div class="page" data-page="3"><div class="card"><h3>Study Suite</h3></div></div>
+        <div class="page" data-page="4"><div class="card"><h3>Missions</h3></div></div>
+        <div class="page" data-page="5"><div class="card"><h3>Targets</h3><div id="hp-bar"></div></div></div>
+        <div class="page" data-page="6"><div class="card"><h3>Summary</h3></div></div>
     </div>
 
-    <div class="card">
-        <h3>Hydration Tracker</h3>
-        <p>Water Intake: 2 glasses</p>
-        <button onclick="alert('XP Gained!')">+ Add Glass</button>
-    </div>
+    <script>
+        let data = { xp: 0, lvl: 1, water: 0, meals: [], missions: [], targets: [] };
+        let currentPage = 0;
+
+        function loginUser() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+        }
+
+        function showPage(idx) {
+            currentPage = idx;
+            document.querySelectorAll('.page').forEach((p, i) => {
+                p.classList.toggle('active', i === idx);
+            });
+        }
+        function nextPage() { if(currentPage < 6) showPage(currentPage + 1); }
+        function prevPage() { if(currentPage > 0) showPage(currentPage - 1); }
+        function addWater(a) { data.water += a; document.getElementById('xp').innerText = data.xp += 5; }
+    </script>
 </body>
 </html>
