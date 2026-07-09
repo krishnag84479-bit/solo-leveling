@@ -361,5 +361,69 @@ window.onload = initDashboard;
     </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LifeOS System | Advanced</title>
+    <style>
+        :root { --neon: #00f3ff; --bg: #050505; }
+        body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; padding: 20px; }
+        .card { border: 1px solid var(--neon); padding: 15px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); }
+        .nav-btn { background: var(--neon); color: black; border: none; padding: 10px; cursor: pointer; font-weight: bold; width: 48%; }
+        .page { display: none; }
+        .page.active { display: block; }
+        input { background: #111; border: 1px solid var(--neon); color: white; width: 90%; padding: 8px; }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <div id="pages-container">
+            <div class="page active" id="p0">
+                <div class="card">
+                    <h3>Hunter Status</h3>
+                    <p>Level: <span id="h-lvl">1</span> | XP: <span id="h-xp">0</span></p>
+                </div>
+            </div>
+
+            <div class="page" id="p1">
+                <div class="card">
+                    <h3>Add New Target</h3>
+                    <input type="text" id="target-input" placeholder="e.g., CA Foundation Study">
+                    <button onclick="addTarget()">Add Target</button>
+                    <ul id="target-list"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div style="display:flex; justify-content: space-between;">
+            <button class="nav-btn" onclick="changePage(-1)">Previous</button>
+            <button class="nav-btn" onclick="changePage(1)">Next / Skip</button>
+        </div>
+    </div>
+
+    <script>
+        let cur = 0;
+        const pages = document.querySelectorAll('.page');
+        
+        function changePage(dir) {
+            pages[cur].classList.remove('active');
+            cur = (cur + dir + pages.length) % pages.length;
+            pages[cur].classList.add('active');
+        }
+
+        function addTarget() {
+            const val = document.getElementById('target-input').value;
+            if(val) {
+                const li = document.createElement('li');
+                li.innerText = val;
+                document.getElementById('target-list').appendChild(li);
+                document.getElementById('target-input').value = '';
+            }
+        }
+    </script>
+</body>
+</html>
 
 
